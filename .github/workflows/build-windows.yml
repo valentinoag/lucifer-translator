@@ -1,0 +1,70 @@
+# Builds the ready-to-run Windows app on GitHub's Windows machines, so the PC that uses it
+# needs nothing installed. Download the result from this workflow run's "Artifacts" section.
+name: Build Windows app
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # The app may be at the top of the repository or inside folders, depending on how it was uploaded.
+      - name: Find the app folder
+        run: |
+          $app = (Get-ChildItem -Recurse -Filter translator.py | Select-Object -First 1).DirectoryName
+          if (-not $app) { throw "translator.py was not found in the repository" }
+          "APP_DIR=$app" >> $env:GITHUB_ENV
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: "**/requirements.txt"
+
+      - name: Install the translation engine and packaging tool
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --prefer-binary -r requirements.txt pyinstaller
+
+      - name: Download Chinese, Arabic and English language packs
+        working-directory: ${{ env.APP_DIR }}
+        run: python translator.py --install-pair zh ar
+
+      - name: Build LuciferTranslator.exe
+        working-directory: ${{ env.APP_DIR }}
+        run: python build_exe.py "$env:RUNNER_TEMP\dist" "$env:RUNNER_TEMP\build"
+
+      - name: Bundle the language packs
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          $app = "$env:RUNNER_TEMP\dist\LuciferTranslator"
+          New-Item -ItemType Directory -Force "$app\models" | Out-Null
+          Copy-Item models\packages "$app\models\" -Recurse
+
+      - name: Self-test the built app (it must start and translate)
+        run: |
+          $app = "$env:RUNNER_TEMP\dist\LuciferTranslator"
+          $report = "$env:RUNNER_TEMP\selftest.txt"
+          $proc = Start-Process "$app\LuciferTranslator.exe" -ArgumentList "--selftest", "`"$report`"" -Wait -PassThru
+          if (Test-Path $report) { Get-Content $report }
+          if (Test-Path "$app\models\lucifer.log") { Get-Content "$app\models\lucifer.log" }
+          if ($proc.ExitCode -ne 0) { throw "Self-test failed with exit code $($proc.ExitCode)" }
+          # Ship only the language packs - not logs or caches from the test run.
+          Get-ChildItem "$app\models" | Where-Object Name -ne "packages" | Remove-Item -Recurse -Force
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LuciferTranslator-Windows
+          path: ${{ runner.temp }}/dist/LuciferTranslator
+          retention-days: 90
