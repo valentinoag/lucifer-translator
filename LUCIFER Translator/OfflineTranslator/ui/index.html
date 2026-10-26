@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LUCIFER Translator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Purple dusk mountain backdrop behind the glass window -->
+<div class="scene" aria-hidden="true">
+  <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+    <defs>
+      <linearGradient id="m1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8b6cc4"/><stop offset="1" stop-color="#3f2d66"/></linearGradient>
+      <linearGradient id="m2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#55407f"/><stop offset="1" stop-color="#261b40"/></linearGradient>
+      <linearGradient id="m3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f2350"/><stop offset="1" stop-color="#110c1e"/></linearGradient>
+      <radialGradient id="mist" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#e9d5ff" stop-opacity=".22"/><stop offset="1" stop-color="#e9d5ff" stop-opacity="0"/></radialGradient>
+    </defs>
+    <path fill="url(#m1)" opacity=".75" d="M0 470 L110 430 L210 455 L330 360 L420 410 L520 340 L640 420 L760 380 L800 250 L840 380 L980 330 L1080 270 L1160 320 L1270 400 L1390 350 L1500 410 L1600 380 V900 H0Z"/>
+    <ellipse cx="820" cy="470" rx="760" ry="90" fill="url(#mist)"/>
+    <path fill="url(#m2)" d="M0 610 L140 530 L260 580 L380 510 L520 590 L660 530 L800 610 L940 550 L1060 490 L1180 560 L1320 500 L1460 570 L1600 530 V900 H0Z"/>
+    <ellipse cx="380" cy="620" rx="520" ry="60" fill="url(#mist)"/>
+    <path fill="url(#m3)" d="M0 740 L180 660 L340 720 L520 670 L700 750 L880 680 L1060 740 L1240 670 L1420 730 L1600 680 V900 H0Z"/>
+  </svg>
+</div>
+
+<div class="app" id="app">
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="logo">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+          <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fae8ff"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs>
+          <path fill="url(#lg)" d="M12 2c.6 4.8 2.2 7.4 10 10-7.8 2.6-9.4 5.2-10 10-.6-4.8-2.2-7.4-10-10 7.8-2.6 9.4-5.2 10-10z"/>
+        </svg>
+      </span>
+      <div class="brand-text"><b>LUCIFER</b><small>Translator</small></div>
+      <button class="icon-btn" id="collapseBtn" data-icon="panel" title="Collapse sidebar" aria-label="Collapse sidebar"></button>
+    </div>
+
+    <button class="new-btn" id="newBtn" data-icon="circlePlus"><span class="label">New Translation</span></button>
+
+    <div class="nav-label">Features</div>
+    <nav>
+      <button class="nav-item active" data-view="translate" data-icon="languages"><span class="label">Translate</span></button>
+      <button class="nav-item" data-view="history" data-icon="history"><span class="label">History</span></button>
+      <button class="nav-item" data-view="ai" data-icon="cpu"><span class="label">AI Engine</span></button>
+      <button class="nav-item" data-view="packs" data-icon="package"><span class="label">Language Packs</span></button>
+    </nav>
+
+    <div class="divider"></div>
+    <div class="nav-label">Installed Packs</div>
+    <div class="pair-list" id="pairList"></div>
+
+    <div class="promo">
+      <div class="promo-icon" data-icon="shield"></div>
+      <h4>100% Offline &amp; Private</h4>
+      <p>Your text never leaves this PC. Add more languages anytime.</p>
+      <button id="promoBtn">Manage Packs</button>
+    </div>
+  </aside>
+
+  <!-- ===== Main panel ===== -->
+  <main class="main">
+    <header class="topbar">
+      <div class="top-left">
+        <div class="seg" role="radiogroup" aria-label="Translation engine">
+          <button class="seg-btn active" data-engine="argos" role="radio" aria-checked="true" data-icon="languages"><span>Standard</span></button>
+          <button class="seg-btn" data-engine="ai" role="radio" aria-checked="false" data-icon="sparkles"><span>AI · Human-like</span><span class="dot" id="aiDot"></span></button>
+        </div>
+        <div class="pill quiet" title="Everything runs on this computer"><span class="dot"></span>Offline</div>
+      </div>
+      <div class="top-actions">
+        <button class="pill" data-view="packs"><span>Language Packs</span><span data-icon="sliders"></span></button>
+        <button class="pill" id="exportBtn"><span>Export</span><span data-icon="upload"></span></button>
+      </div>
+    </header>
+
+    <!-- Translate -->
+    <section class="view active" id="view-translate">
+      <div class="column">
+        <div class="stage">
+          <div class="hero" id="hero">
+            <div class="orb"></div>
+            <h1>Ready to Translate Something New?</h1>
+            <p id="heroSub">Private, offline translation — nothing you type ever leaves this PC.</p>
+          </div>
+          <div class="result" id="result" hidden>
+            <div class="result-head">
+              <span class="tag" id="resultTag">—</span>
+              <span>Translation</span>
+              <div class="result-actions">
+                <button class="icon-btn" id="copyBtn" data-icon="copy" title="Copy" aria-label="Copy translation"></button>
+                <button class="icon-btn" id="saveBtn" data-icon="download" title="Save as .txt" aria-label="Save translation"></button>
+              </div>
+            </div>
+            <div class="result-text" id="resultText" dir="auto"></div>
+          </div>
+        </div>
+
+        <div class="chips" id="chips"></div>
+
+        <div class="composer">
+          <div class="lang-row">
+            <select class="select" id="fromSel" aria-label="Translate from"></select>
+            <button class="swap" id="swapBtn" data-icon="swap" title="Swap languages" aria-label="Swap languages"></button>
+            <select class="select" id="toSel" aria-label="Translate to"></select>
+            <select class="select" id="toneSel" aria-label="Tone" hidden>
+              <option value="natural">Natural tone</option>
+              <option value="casual">Casual tone</option>
+              <option value="formal">Formal tone</option>
+              <option value="business">Business tone</option>
+              <option value="literal">Literal</option>
+            </select>
+            <label class="live" title="Translate automatically while typing">
+              <input type="checkbox" id="liveChk" checked> Live
+            </label>
+          </div>
+          <div class="input-wrap">
+            <svg class="sparkle" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c.6 4.8 2.2 7.4 10 10-7.8 2.6-9.4 5.2-10 10-.6-4.8-2.2-7.4-10-10 7.8-2.6 9.4-5.2 10-10z"/></svg>
+            <textarea id="src" dir="auto" placeholder="Type or paste anything to translate…" spellcheck="false"></textarea>
+          </div>
+          <div class="composer-foot">
+            <button class="tool" id="openBtn" data-icon="paperclip"><span>Open file</span></button>
+            <span class="sep"></span>
+            <button class="tool" id="clearBtn" data-icon="trash"><span>Clear</span></button>
+            <span class="sep"></span>
+            <button class="tool" id="copySrcBtn" data-icon="copy"><span>Copy result</span></button>
+            <span class="count" id="count">0 characters</span>
+            <button class="send" id="sendBtn" data-icon="arrowUp" title="Translate (Ctrl+Enter)" aria-label="Translate"></button>
+          </div>
+        </div>
+
+        <div class="cards" id="cards">
+          <button class="card" data-action="ai">
+            <div class="card-top"><span class="card-icon" data-icon="sparkles"></span><span class="card-tag">Try AI Mode</span></div>
+            <h3>Human-like AI</h3>
+            <p>A local AI rewrites meaning, tone and idioms like a native speaker would.</p>
+          </button>
+          <button class="card" data-action="open">
+            <div class="card-top"><span class="card-icon" data-icon="fileText"></span><span class="card-tag">Open File</span></div>
+            <h3>Document Translation</h3>
+            <p>Load a .txt, .md or subtitle file and translate it in one go.</p>
+          </button>
+          <button class="card" data-action="packs">
+            <div class="card-top"><span class="card-icon" data-icon="globe"></span><span class="card-tag">Add Languages</span></div>
+            <h3>Language Packs</h3>
+            <p>Download packs once, then translate with Wi-Fi off — forever.</p>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- History -->
+    <section class="view" id="view-history">
+      <div class="page">
+        <div class="page-head">
+          <div><h2>History</h2><p>Saved on this PC only. Click an entry to reopen it.</p></div>
+          <div class="page-actions"><button class="btn" id="clearHistoryBtn" data-icon="trash">Clear all</button></div>
+        </div>
+        <div class="list" id="historyList"></div>
+      </div>
+    </section>
+
+    <!-- AI engine -->
+    <section class="view" id="view-ai">
+      <div class="page">
+        <div class="page-head">
+          <div><h2>AI Engine</h2><p>Human-like translation by a language model running on this PC through Ollama — works with Wi-Fi off.</p></div>
+          <div class="page-actions"><button class="btn" id="aiRefreshBtn" data-icon="refresh">Check again</button></div>
+        </div>
+        <div class="status-line" id="aiStatus"></div>
+        <div class="list" id="aiList"></div>
+      </div>
+    </section>
+
+    <!-- Language packs -->
+    <section class="view" id="view-packs">
+      <div class="page">
+        <div class="page-head">
+          <div><h2>Language Packs</h2><p>Each pack translates one direction. Missing pairs are routed through English automatically.</p></div>
+          <div class="page-actions">
+            <label class="search"><span data-icon="search"></span><input id="packSearch" placeholder="Search languages" aria-label="Search languages"></label>
+            <button class="btn" id="fetchBtn" data-icon="refresh">Refresh list</button>
+            <button class="btn" id="fileBtn" data-icon="paperclip">Install from file</button>
+          </div>
+        </div>
+        <div class="status-line" id="packStatus"></div>
+        <div class="list" id="packList"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+</body>
+</html>
